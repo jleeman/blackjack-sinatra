@@ -7,6 +7,14 @@ set :sessions, true
 # routing processes here, get/posts
 
 get '/' do
+  if session[:user_name]
+  redirect '/game'
+  else
+    redirect '/set_name'
+  end
+end
+
+get '/set_name' do
   erb :set_name
 end
 
