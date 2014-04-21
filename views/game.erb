@@ -1,5 +1,10 @@
 <p><%=session[:user_name]%>, you have chosen to bet $<%=session[:bet]%>.</p>
 
+<p><%=session[:deck]%></p>
+<p><%=session[:img_path]%></p>
+<%img_path = session[:img_path].to_s%>
+<img src="/public/images/cards/clubs_4.jpg" border="0">
+
 <p>Now we are beginning a game (display initial dealt cards here).</p>
 
 

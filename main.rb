@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'shotgun'
+require 'pry'
 
 set :sessions, true
 
@@ -32,45 +33,32 @@ post '/set_bet' do
   redirect '/game'
 end
 
-# set up other session cookie hash values for game
-
 get '/game' do
   session[:money] = 500
-  session[:deck] = []
+  session[:deck] = init_deck
+  deck = session[:deck]
+  test_card = deck[8]
+  session[:img_path] = set_img_path(test_card)
+  puts session[:img_path]
   erb :game
 end
 
-# methods etc needed by game
-
-class Deck
-  attr_accessor :cards
-  
-  def initialize(n)
-    suits = ['Spades', 'Clubs', 'Diamonds', 'Hearts']
-    values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-    @cards = []
-    n.times do
-      suits.each do |s|
-        values.each do |v|
-          @cards << Card.new(s, v)
-        end
-      end
-    end
-    @cards.shuffle!
-  end
-
-  def first_deal(dealer, players)
-    2.times do
-      players.each do |p| 
-        p.hand << deal_card
-      end 
-      dealer.hand << deal_card
+def init_deck
+  deck = []
+  suits = ['Spades', 'Clubs', 'Diamonds', 'Hearts']
+  values = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
+  suits.each do |suit|
+    values.each do |value|
+      deck << [suit, value]
     end
   end
+  deck.shuffle!
+end
 
-  def deal_card
-    cards.pop
-  end
+def set_img_path(card)
+  suit = card[0].downcase
+  value = card[1].downcase
+  img_path = "/public/images/cards/#{suit}_#{value}.jpg"
 end
 
 
