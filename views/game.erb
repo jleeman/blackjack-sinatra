@@ -1,10 +1,28 @@
-<p><%=session[:user_name]%>, you have chosen to bet $<%=session[:bet]%>.</p>
+<h1>Blackjack</h1>
 
-<p><%=session[:deck]%></p>
-<p><%=session[:img_path]%></p>
-<%img_path = session[:img_path].to_s%>
-<img src="/public/images/cards/clubs_4.jpg" border="0">
+<p><%= session[:user_name]%>, you have chosen to bet $<%=session[:bet] %>.</p>
 
-<p>Now we are beginning a game (display initial dealt cards here).</p>
+<div class="well" id="dealer">
+  <h4>Dealer cards:</h4>
+  <img src="images/cards/cover.jpg" border="0">
+  <%= session[:dealer_image_paths] %>
+  <%= session[:dealer_cards] %>
+  <img src="<%session[:dealer_image_paths[1]]%>" border="0"/>
+</div>
 
+<div class="well" id="player">
+  <h4>Player cards:</h4>
+  <%= session[:player_image_paths] %>
+  <%= session[:player_cards] %>
+</div>
 
+<h3>Player has <%= session[:player_total] %>. Hit or stay?</h3>
+
+<p id="action_buttons">
+  <form id="hit" action="/game/player/hit" method="POST">
+    <input type="submit" value="Hit" class="btn btn-success btn-large">
+  </form>
+  <form id="stay" action="/game/player/stay" method="POST">
+    <input type="submit" value="Stay" class="btn btn-warning btn-large">
+  </form>
+</p>
