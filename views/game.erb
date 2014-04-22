@@ -4,26 +4,30 @@
 
 <div class="well" id="dealer">
   <h4>Dealer cards:</h4>
-  <img src="images/cards/cover.jpg" border="0">
-  <%= session[:dealer_image_paths] %>
-  <%= session[:dealer_cards] %>
-  <% session[:dealer_cards].each do |card| %>
-    <%= display_card(card) %>
-  <% end %>
+  <img src="/images/cards/cover.jpg" border="0" />
+    <%= display_card(session[:dealer_cards][1]) %>
 </div>
 
 <div class="well" id="player">
   <h4>Player cards:</h4>
-  <%= session[:player_image_paths] %>
-  <%= session[:player_cards] %>
+  <% session[:player_cards].each do |card| %>
+    <%= display_card(card) %>
+  <% end %>
 </div>
 
 <% if @show_buttons == true %>
-<h3>Player has <%= total(session[:player_cards]) %>. Hit or stay?</h3>
+  
+  <% if total(session[:player_cards]) == 21 %>
+    <h3><%= session[:user_name] %> hit blackjack!!! Game over.</h3>
+    <% break %>
+  <% end %>
+  
+  <h3>Player has <%= total(session[:player_cards]) %>. Hit or stay?</h3>
   <form id="hit" action="/player/hit" method="POST">
     <input type="submit" value="Hit" class="btn btn-success btn-large">
   </form>
   <form id="stay" action="/player/stay" method="POST">
     <input type="submit" value="Stay" class="btn btn-warning btn-large">
   </form>
+
 <% end %>
