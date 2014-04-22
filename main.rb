@@ -54,13 +54,16 @@ helpers do
   def display_card(card)
     suit = card[0]
     value = card[1]
-    "<img src='/images/cards/#{suit}_#{value}.jpg' />"
+    "<img src='/images/cards/#{suit}_#{value}.jpg' style='margin-right:10px' />"
   end
 
 end
 
 before do
   @show_buttons = true
+  @hide_dealer_card = true
+  @won = false
+  @lost = false
 end
 
 # routing processes here, get/posts
@@ -78,7 +81,7 @@ get '/player/set_name' do
 end
 
 post '/player/set_name' do
-  session[:user_name] = params[:user_name]
+  session[:player_name] = params[:player_name]
   redirect '/player/set_bet'
 end
 
@@ -99,8 +102,6 @@ get '/game' do
   first_deal(session[:player_cards], session[:dealer_cards], session[:deck])
   session[:player_total] = total(session[:player_cards])
   session[:dealer_total] = total(session[:dealer_cards])
-  session[:player_image_paths] = image_paths(session[:player_cards])
-  session[:dealer_image_paths] = image_paths(session[:dealer_cards])
 
   erb :game
 end
@@ -108,7 +109,8 @@ end
 post '/player/hit' do
   session[:player_cards] << session[:deck].pop
   if total(session[:player_cards]) > 21
-    @bust = "Sorry, you went bust!"
+    session[:money] -= session[:bet]
+    @error = "Sorry, #{session[:player_name]}, you went bust! You now have $#{session[:money]}"
     @show_buttons = false
   end
   erb :'/game'
@@ -117,6 +119,22 @@ end
 post '/player/stay' do
   @stay = "You have chosen to stay."
   @show_buttons = false
+  @hide_dealer_card = false
+  erb :'/game'
+end
+
+post '/dealer/hit' do
+  if total(session[:dealer_cards]) < 17
+    session[:dealer_cards] << session[:deck].pop
+  elsif total(session[:dealer_cards]) > 21
+    session[:money] += session[:bet]
+    @success = "Dealer went bust, you win, #{session[:player_name]}! You now have $#{session[:money]}"
+  elsif
+    total(session[:dealer_cards]) == 21
+    session[:money] -= session[:bet]
+    @error = "Dealer hit blackjack, you lost, #{session[:player_name]}! You now have $#{session[:money]}"
+  end
+  @hide_dealer_card = false
   erb :'/game'
 end
 

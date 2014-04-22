@@ -1,12 +1,32 @@
 <h1>Blackjack</h1>
 
-<p><%= session[:user_name]%>, you have chosen to bet $<%=session[:bet] %>.</p>
+<% if @hide_dealer_card == true %>
 
-<div class="well" id="dealer">
-  <h4>Dealer cards:</h4>
-  <img src="/images/cards/cover.jpg" border="0" />
-    <%= display_card(session[:dealer_cards][1]) %>
-</div>
+  <h3>Welcome, <%= session[:player_name]%>, you have chosen to bet $<%=session[:bet] %>.</h3>
+
+  <div class="well" id="dealer">
+    <h4>Dealer cards:</h4>
+    <img src="/images/cards/cover.jpg" border="0" style="margin-right:10px" />
+      <%= display_card(session[:dealer_cards][1]) %>
+  </div>
+
+<% elsif @hide_dealer_card == false %>
+
+  <h3>Now it's the dealer's turn. Dealer's total is <%= total(session[:dealer_cards]) %>. Deal a card?</h3>
+
+  <form action="/dealer/hit" method="POST">
+    <input type="submit" value="Deal" class="btn btn-success btn-large">
+  </form>
+  
+
+  <div class="well" id="dealer">
+    <h4>Dealer cards:</h4>
+      <% session[:dealer_cards].each do |card| %>
+        <%= display_card(card) %>
+      <% end %>
+  </div>
+
+<% end %>
 
 <div class="well" id="player">
   <h4>Player cards:</h4>
@@ -18,7 +38,7 @@
 <% if @show_buttons == true %>
   
   <% if total(session[:player_cards]) == 21 %>
-    <h3><%= session[:user_name] %> hit blackjack!!! Game over.</h3>
+    <% @success = '#{session[:player_name]} hit blackjack!!! Game over.' %></h3>
     <% break %>
   <% end %>
   

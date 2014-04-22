@@ -18,11 +18,11 @@
     </div>
 
   <div class="container">
-    <%if @bust %>
-      <div class="alert alert-error"><%=@bust%></div>
+    <%if @error %>
+      <div class="alert alert-error"><%=@error%></div>
     <% end %>
-    <%if @stay %>
-      <div class="alert alert-success"><%=@stay%></div>
+    <%if @success %>
+      <div class="alert alert-success"><%=@success%></div>
     <% end %>
       <%= yield %>
   </div>
