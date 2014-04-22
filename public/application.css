@@ -1,0 +1,8 @@
+form#hit {
+  float: left;
+  padding-right: 10px;
+}
+
+form#stay {
+  float: left;
+}

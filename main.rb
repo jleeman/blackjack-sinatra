@@ -23,22 +23,22 @@ helpers do
   end
 
   def total(h)
-    h_value = 0
-    h.each do |card|
-      value = card[1]
-      case value
-        when /[2-9]|[1][0]/ 
-          h_value += value.to_i 
-        when "Jack" || "Queen" || "King"
-          h_value += 10
-        when "A"
-          h_value += 11
-          if h_value > 21
-            h_value -= 10 
-          end 
+    values = h.map{|card| card[1]}
+
+    h_total = 0
+    values.each do |value|
+      if value == "Ace"
+        h_total += 11
+      else
+        h_total += value.to_i == 0 ? 10 : value.to_i
       end
     end
-    h_value
+
+    values.select{|value| value == "Ace"}.count.times do
+      break if h_total <= 21
+      h_total -= 10
+    end
+    h_total
   end
 
   def image_paths(hand)
@@ -51,6 +51,16 @@ helpers do
     paths
   end
 
+  def display_card(card)
+    suit = card[0]
+    value = card[1]
+    "<img src='/images/cards/#{suit}_#{value}.jpg' />"
+  end
+
+end
+
+before do
+  @show_buttons = true
 end
 
 # routing processes here, get/posts
@@ -59,21 +69,21 @@ get '/' do
   if session[:user_name]
   redirect '/game'
   else
-    redirect 'player/set_name'
+    redirect '/player/set_name'
   end
 end
 
 get '/player/set_name' do
-  erb :set_name
+  erb :'/player/set_name'
 end
 
 post '/player/set_name' do
   session[:user_name] = params[:user_name]
-  redirect 'player/set_bet'
+  redirect '/player/set_bet'
 end
 
 get '/player/set_bet' do
-  erb :set_bet
+  erb :'/player/set_bet'
 end
 
 post '/player/set_bet' do
@@ -95,20 +105,19 @@ get '/game' do
   erb :game
 end
 
-post '/game' do
-  if params[:Hit]
-    redirect '/player/hit'
-  elsif params[:Stay]
-    redirect '/player/stay'
+post '/player/hit' do
+  session[:player_cards] << session[:deck].pop
+  if total(session[:player_cards]) > 21
+    @bust = "Sorry, you went bust!"
+    @show_buttons = false
   end
+  erb :'/game'
 end
 
-get '/player/hit' do
-  erb :hit
-end
-
-get '/player/stay' do
-  erb :stay
+post '/player/stay' do
+  @stay = "You have chosen to stay."
+  @show_buttons = false
+  erb :'/game'
 end
 
 
