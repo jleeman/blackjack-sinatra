@@ -1,5 +1,5 @@
 
-<h3>Welcome, <%=session[:player_name]%>! You have $500 to start with. How much would you like to bet?</h3>
+<h3>Welcome, <%= session[:player_name] %>! You have $<%= session[:money] %>. How much would you like to bet?</h3>
 
 <form action="/player/set_bet" role="form" method="post">
 <input type="text" class="form-control" placeholder="Bet" name="bet"><br />

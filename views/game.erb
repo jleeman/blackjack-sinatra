@@ -10,13 +10,17 @@
       <%= display_card(session[:dealer_cards][1]) %>
   </div>
 
-<% elsif @hide_dealer_card == false %>
+<% elsif @hide_dealer_card == false %> 
 
-  <h3>Now it's the dealer's turn. Dealer's total is <%= total(session[:dealer_cards]) %>. Deal a card?</h3>
+  <% if @show_dealer_option == true %>
 
-  <form action="/dealer/hit" method="POST">
-    <input type="submit" value="Deal" class="btn btn-success btn-large">
-  </form>
+    <h3>Now it's the dealer's turn. Dealer's total is <%= total(session[:dealer_cards]) %>. Deal a card?</h3>
+
+    <form action="/dealer/hit" method="POST">
+      <input type="submit" value="Deal" class="btn btn-success btn-large">
+    </form>
+
+  <% end %>
   
 
   <div class="well" id="dealer">
@@ -37,12 +41,7 @@
 
 <% if @show_buttons == true %>
   
-  <% if total(session[:player_cards]) == 21 %>
-    <% @success = '#{session[:player_name]} hit blackjack!!! Game over.' %></h3>
-    <% break %>
-  <% end %>
-  
-  <h3>Player has <%= total(session[:player_cards]) %>. Hit or stay?</h3>
+  <h3><%= session[:player_name] %> has <%= total(session[:player_cards]) %>. Hit or stay?</h3>
   <form id="hit" action="/player/hit" method="POST">
     <input type="submit" value="Hit" class="btn btn-success btn-large">
   </form>
@@ -51,3 +50,5 @@
   </form>
 
 <% end %>
+
+

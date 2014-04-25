@@ -57,13 +57,22 @@ helpers do
     "<img src='/images/cards/#{suit}_#{value}.jpg' style='margin-right:10px' />"
   end
 
+  def compare(player_cards, dealer_cards)
+    if total(player_cards) > total(dealer_cards)
+      winner = "player"
+    elsif total(player_cards) == total(dealer_cards)
+      winner = "push"
+    else
+      winner = "dealer"
+    end
+  end
+
 end
 
 before do
   @show_buttons = true
+  @show_dealer_option = true
   @hide_dealer_card = true
-  @won = false
-  @lost = false
 end
 
 # routing processes here, get/posts
@@ -77,6 +86,7 @@ get '/' do
 end
 
 get '/player/set_name' do
+  session[:money] = 500
   erb :'/player/set_name'
 end
 
@@ -95,46 +105,82 @@ post '/player/set_bet' do
 end
 
 get '/game' do
-  session[:money] = 500
   session[:deck] = init_deck
   session[:player_cards] = []
   session[:dealer_cards] = []
   first_deal(session[:player_cards], session[:dealer_cards], session[:deck])
   session[:player_total] = total(session[:player_cards])
   session[:dealer_total] = total(session[:dealer_cards])
-
+  if total(session[:player_cards]) == 21
+    @success = "#{session[:player_name]} hit blackjack! Game over"
+  end
   erb :game
 end
 
 post '/player/hit' do
   session[:player_cards] << session[:deck].pop
-  if total(session[:player_cards]) > 21
-    session[:money] -= session[:bet]
-    @error = "Sorry, #{session[:player_name]}, you went bust! You now have $#{session[:money]}"
+  if total(session[:player_cards]) == 21
+    session[:money] += session[:bet]
+    @success = "#{session[:player_name]} hit blackjack! #{session[:player_name]} now has $#{session[:money]}."
     @show_buttons = false
+    @show_dealer_option = false
+  elsif total(session[:player_cards]) > 21
+    session[:money] -= session[:bet]
+    @error = "Sorry, #{session[:player_name]}, you went bust! #{session[:player_name]} now has $#{session[:money]}."
+    @show_buttons = false
+    @show_dealer_option = false
   end
   erb :'/game'
 end
 
 post '/player/stay' do
-  @stay = "You have chosen to stay."
   @show_buttons = false
   @hide_dealer_card = false
+  if total(session[:dealer_cards]) > 16 && total(session[:dealer_cards]) < 21
+    winner = compare(session[:player_cards], session[:dealer_cards])
+    if winner == "player"
+      session[:money] += session[:bet]
+      @success = "Your cards more than dealer cards, you win, #{session[:player_name]}! You now have $#{session[:money]}."
+      @show_dealer_option = false
+    elsif winner == "push"
+      @error = "It's a push, #{session[:player_name]}! You still have $#{session[:money]}."
+      @show_dealer_option = false
+    else 
+      session[:money] -= session[:bet]
+      @error = "Your cards less than dealer cards, you lose, #{session[:player_name]}! You now have $#{session[:money]}."
+      @show_dealer_option = false
+    end
+  end
   erb :'/game'
 end
 
 post '/dealer/hit' do
-  if total(session[:dealer_cards]) < 17
-    session[:dealer_cards] << session[:deck].pop
-  elsif total(session[:dealer_cards]) > 21
-    session[:money] += session[:bet]
-    @success = "Dealer went bust, you win, #{session[:player_name]}! You now have $#{session[:money]}"
-  elsif
-    total(session[:dealer_cards]) == 21
-    session[:money] -= session[:bet]
-    @error = "Dealer hit blackjack, you lost, #{session[:player_name]}! You now have $#{session[:money]}"
-  end
+  session[:dealer_cards] << session[:deck].pop
+  @show_buttons = false
   @hide_dealer_card = false
+  if total(session[:dealer_cards]) > 21
+    session[:money] += session[:bet]
+    @success = "Dealer went bust, you win, #{session[:player_name]}! You now have $#{session[:money]}."
+    @show_dealer_option = false
+  elsif total(session[:dealer_cards]) == 21
+    session[:money] -= session[:bet]
+    @error = "Dealer hit blackjack, you lost, #{session[:player_name]}! You now have $#{session[:money]}."
+    @show_dealer_option = false
+  elsif total(session[:dealer_cards]) > 16 && total(session[:dealer_cards]) < 21
+    winner = compare(session[:player_cards], session[:dealer_cards])
+    if winner == "player"
+      session[:money] += session[:bet]
+      @success = "Your cards more than dealer cards, you win, #{session[:player_name]}! You now have $#{session[:money]}."
+      @show_dealer_option = false
+    elsif winner == "push"
+      @error = "It's a push, #{session[:player_name]}! You still have $#{session[:money]}."
+      @show_dealer_option = false
+    else       
+      session[:money] -= session[:bet]
+      @error = "Your cards less than dealer cards, you lose, #{session[:player_name]}! You now have $#{session[:money]}."
+      @show_dealer_option = false
+    end
+  end
   erb :'/game'
 end
 
