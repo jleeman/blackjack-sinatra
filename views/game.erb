@@ -1,8 +1,18 @@
 <h1>Blackjack</h1>
 
-<% if @hide_dealer_card == true %>
+<% if @play_again == true %>
 
-  <h3>Welcome, <%= session[:player_name]%>, you have chosen to bet $<%=session[:bet] %>.</h3>
+  <p>
+    <strong>Play again?</strong>
+    <a href="/player/set_bet" class="btn btn-primary">Yes</a>
+    <a href="/game_over" class="btn">No</a>
+  </p>
+
+<% end %>
+
+<% if @show_dealer_card == false %>
+
+  <h3><%= session[:player_name]%>, you have chosen to bet $<%=session[:bet] %>.</h3>
 
   <div class="well" id="dealer">
     <h4>Dealer cards:</h4>
@@ -10,23 +20,23 @@
       <%= display_card(session[:dealer_cards][1]) %>
   </div>
 
-<% elsif @hide_dealer_card == false %> 
-
-  <% if @show_dealer_option == true %>
-
-    <h3>Now it's the dealer's turn. Dealer's total is <%= total(session[:dealer_cards]) %>. Deal a card?</h3>
-
-    <form action="/dealer/hit" method="POST">
-      <input type="submit" value="Deal" class="btn btn-success btn-large">
-    </form>
-
-  <% end %>
-  
+<% elsif @show_dealer_card == true %>   
 
   <div class="well" id="dealer">
     <h4>Dealer cards:</h4>
       <% session[:dealer_cards].each do |card| %>
         <%= display_card(card) %>
+      <% end %>
+      
+      <% if @show_dealer_option == true %>
+
+        <br /><br  />
+        <p>Dealer's total is <%= total(session[:dealer_cards]) %> and will hit.</p>
+
+        <form action="/dealer/hit" method="POST">
+          <input type="submit" value="Click to show dealer's next card." class="btn btn-primary">
+        </form>
+
       <% end %>
   </div>
 
@@ -39,7 +49,7 @@
   <% end %>
 </div>
 
-<% if @show_buttons == true %>
+<% if @show_hit_stay == true %>
   
   <h3><%= session[:player_name] %> has <%= total(session[:player_cards]) %>. Hit or stay?</h3>
   <form id="hit" action="/player/hit" method="POST">
