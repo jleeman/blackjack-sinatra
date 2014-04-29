@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'sinatra'
-require 'shotgun'
+# require 'shotgun'
 require 'pry'
 
 set :sessions, true
