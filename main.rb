@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'sinatra'
-# require 'shotgun'
+require 'shotgun'
 require 'pry'
 
 set :sessions, true
@@ -49,7 +49,7 @@ helpers do
   def display_card(card)
     suit = card[0]
     value = card[1]
-    "<img src='/images/cards/#{suit}_#{value}.jpg' style='margin-right:10px' />"
+    "<img src='/images/cards/#{suit.downcase}_#{value}.jpg' style='margin-right:10px' />"
   end
 
   def win!(message)
