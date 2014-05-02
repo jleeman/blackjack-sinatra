@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'sinatra'
-# require 'shotgun'
+require 'shotgun'
 require 'pry'
 
 set :sessions, true
@@ -58,7 +58,7 @@ helpers do
     @play_again = true
     # update player money
     session[:money] += session[:bet]
-    @success = "<strong>#{session[:player_name]} wins!!!</strong> #{message}<br  />#{session[:player_name]} now has $#{session[:money]}."
+    @winner = "<strong>#{session[:player_name]} wins!!!</strong> #{message}<br  />#{session[:player_name]} now has $#{session[:money]}."
   end
 
   def lose!(message)
@@ -67,14 +67,14 @@ helpers do
     @play_again = true
     # update player money
     session[:money] -= session[:bet]
-    @error = "<strong>#{session[:player_name]} loses, sorry!</strong> #{message}<br  />#{session[:player_name]} now has $#{session[:money]}."
+    @loser = "<strong>#{session[:player_name]} loses, sorry!</strong> #{message}<br  />#{session[:player_name]} now has $#{session[:money]}."
   end
 
   def tie!(message)
     @show_hit_stay = false
     @show_dealer_option = false
     @play_again = true
-    @success = "<strong>It's a push!</strong> #{message}<br  />#{session[:player_name]} still has $#{session[:money]}."
+    @winner = "<strong>It's a push!</strong> #{message}<br  />#{session[:player_name]} still has $#{session[:money]}."
   end
 
 end
@@ -105,13 +105,22 @@ post '/player/set_name' do
   redirect '/player/set_bet'
 end
 
-get '/player/set_bet' do
+get '/player/set_bet' do     
   erb :'/player/set_bet'
 end
 
 post '/player/set_bet' do
-  session[:bet] = params[:bet].to_i
-  redirect '/game'
+  bet = params[:bet].to_i
+  if bet.nil? || bet == 0
+    @error = "Must make a bet!"
+    halt erb(:'player/set_bet')
+  elsif bet > session[:money]
+    @error = "You don't have enough money! Please try again."
+    halt erb(:'player/set_bet')
+  else
+    session[:bet] = bet
+    redirect '/game'
+  end
 end
 
 get '/game' do
@@ -136,7 +145,7 @@ post '/player/hit' do
   elsif player_total > BLACKJACK_VALUE
     lose!("#{session[:player_name]} went bust at #{player_total}!")  
   end
-  erb :'/game'
+  erb :game, layout: false
 end
 
 post '/player/stay' do
@@ -160,7 +169,7 @@ get '/dealer' do
     @show_dealer_option = true
   end
 
-  erb :'/game'
+  erb :game, layout: false
 end
 
 post '/dealer/hit' do
@@ -187,7 +196,7 @@ get '/compare' do
 end
 
 get '/game_over' do
-  erb :'game_over'
+  erb :'game_over', layout: false
 end
 
 
